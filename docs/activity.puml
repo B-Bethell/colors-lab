@@ -1,0 +1,72 @@
+@startuml
+|User|
+start
+:Enter login and password, click Login;
+
+|Browser (JS)|
+:doLogin() sends POST to Login.php;
+
+|Server (PHP)|
+:Receive JSON {login, password};
+
+|Database|
+:SELECT ID, firstName, lastName\nFROM Users WHERE Login=? AND Password=?;
+
+|Server (PHP)|
+if (Matching user found?) then (yes)
+  :Return id, firstName, lastName;
+else (no)
+  :Return id 0, error "No Records Found";
+endif
+
+|Browser (JS)|
+if (userId < 1?) then (yes)
+  :Show "User/Password combination incorrect";
+  |User|
+  stop
+else (no)
+  :saveCookie() (expires in 20 min);
+  :Redirect to color.html;
+endif
+
+|User|
+:Enter color name, click Add;
+
+|Browser (JS)|
+:addColor() sends POST to AddColor.php;
+
+|Server (PHP)|
+:Receive JSON {color, userId};
+
+|Database|
+:INSERT INTO Colors (UserId, Name);
+
+|Browser (JS)|
+:Show "Color has been added";
+
+|User|
+:Enter search text, click Search;
+
+|Browser (JS)|
+:searchColor() sends POST to SearchColors.php;
+
+|Server (PHP)|
+:Receive JSON {search, userId};
+
+|Database|
+:SELECT Name FROM Colors\nWHERE Name LIKE %search% AND UserID=?;
+
+|Server (PHP)|
+if (Rows found?) then (yes)
+  :Return results array;
+else (no)
+  :Return error "No Records Found";
+endif
+
+|Browser (JS)|
+:Display matching colors in the page;
+
+|User|
+:See results;
+stop
+@enduml
